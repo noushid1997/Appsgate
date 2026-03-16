@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Approver Level 1 Group -->
+        <record id="group_purchase_approver_level1" model="res.groups">
+            <field name="name">Approver Level 1</field>
+            <field name="implied_ids" eval="[(4, ref('purchase.group_purchase_user'))]" />
+            <field name="category_id" ref="base.module_category_inventory_purchase" />
+        </record>
+        <!-- Approver Level 2 Group -->
+        <record id="group_purchase_approver_level2" model="res.groups">
+            <field name="name">Approver Level 2</field>
+            <field name="implied_ids" eval="[(4, ref('purchase.group_purchase_user'))]" />
+            <field name="category_id" ref="base.module_category_inventory_purchase" />
+        </record>
+    </data>
+</odoo>

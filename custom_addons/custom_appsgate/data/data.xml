@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+        <record id="po_mail_level1" model="mail.template">
+            <field name="name">Purchase Order : Level 1 Approval</field>
+            <field name="subject">Approval Request: Level 1 approval for {{ object.name }}</field>
+            <field name="model_id" ref="purchase.model_purchase_order" />
+            <field name="body_html" type="html">
+                <div style="margin: 0px; padding: 0px;">
+                    <p>Dear Approver,</p>
+                    <p>Purchase Order : <t t-out="object.name" /><br /> Waiting for Level 1 Approval
+                        Please login in and Approve.<br /></p>
+                    <p>Best regards,</p>
+                </div>
+            </field>
+        </record>
+
+        <record id="po_mail_level2" model="mail.template">
+            <field name="name">Purchase Order : Level 2 Approval</field>
+            <field name="subject">Approval Request: Level 2 approval for {{ object.name }}</field>
+            <field name="model_id" ref="purchase.model_purchase_order" />
+            <field name="body_html" type="html">
+                <div style="margin: 0px; padding: 0px;">
+                    <p>Dear Approver,</p>
+                    <p>Purchase Order : <t t-out="object.name" /> <br /> Waiting for Level 2 Approval
+                        Please login in and Approve.<br /></p>
+                    <p>Best regards,</p>
+                </div>
+            </field>
+        </record>
+
+        <!-- Account Details-->
+        <record id="account_advance_received" model="account.account">
+            <field name="name">Advance Received from Customers</field>
+            <field name="code">ADV001</field>
+            <field name="account_type">liability_current</field>
+            <field name="reconcile" eval="True" />
+            <field name="company_ids" eval="[(4, ref('base.main_company'))]" />
+        </record>
+
+        <!-- Advance Payment Journal -->
+        <record id="journal_advance_payment" model="account.journal">
+            <field name="name">Advance Payments</field>
+            <field name="code">ADV</field>
+            <field name="type">general</field>
+            <field name="company_id" ref="base.main_company" />
+        </record>
+
+    </data>
+</odoo>

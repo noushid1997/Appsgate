@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <!-- ══════════════════════════════════════════════════════════ -->
+    <!-- QWeb Report Action for PDF Generation                     -->
+    <!-- ══════════════════════════════════════════════════════════ -->
+
+    <!-- ── Custom Paper Format (Landscape A4) ── -->
+    <record id="paperformat_profitability" model="report.paperformat">
+        <field name="name">Profitability Report - Landscape A4</field>
+        <field name="default" eval="False" />
+        <field name="format">A4</field>
+        <field name="orientation">Landscape</field>
+        <field name="margin_top">25</field>
+        <field name="margin_bottom">20</field>
+        <field name="margin_left">10</field>
+        <field name="margin_right">10</field>
+        <field name="header_line" eval="False" />
+        <field name="header_spacing">20</field>
+        <field name="dpi">90</field>
+    </record>
+
+    <record id="action_report_profitability_pdf" model="ir.actions.report">
+        <field name="name">Sales Profitability Report</field>
+        <field name="model">sale.profitability.wizard</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">custom_appsgate.report_profitability_document</field>
+        <field name="report_file">custom_appsgate.report_profitability_document</field>
+        <field name="binding_type">report</field>
+        <field name="paperformat_id"
+            ref="custom_appsgate.paperformat_profitability" />
+    </record>
+
+</odoo>

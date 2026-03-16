@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <!-- ══════════════════════════════════════════════════════════ -->
+    <!-- STEP 1: Define the LINE list view FIRST (before form)     -->
+    <!-- This must come BEFORE the wizard form that references it  -->
+    <!-- ══════════════════════════════════════════════════════════ -->
+
+    <record id="view_sale_profitability_wizard_line_list" model="ir.ui.view">
+        <field name="name">sale.profitability.wizard.line.list</field>
+        <field name="model">sale.profitability.wizard.line</field>
+        <field name="arch" type="xml">
+            <list decoration-danger="margin &lt; 0"
+                decoration-success="margin &gt; 0"
+                create="false"
+                delete="false"
+                edit="false">
+                <field name="order_name" />
+                <field name="order_date" />
+                <field name="partner_name" />
+                <field name="product_name" />
+                <field name="category_name" optional="show" />
+                <field name="quantity" sum="Total Qty" />
+                <field name="revenue" sum="Total Revenue" />
+                <field name="cost" sum="Total Cost" />
+                <field name="margin" sum="Total Margin" />
+                <field name="margin_percent"
+                    string="Margin %"
+                    avg="Avg Margin %" />
+        </list>
+        </field>
+    </record>
+
+    <!-- ══════════════════════════════════════════════════════════ -->
+    <!-- STEP 2: WIZARD FORM VIEW                                  -->
+    <!-- Uses view_mode reference for line_ids instead of inline   -->
+    <!-- ══════════════════════════════════════════════════════════ -->
+
+    <record id="view_sale_profitability_wizard_form" model="ir.ui.view">
+        <field name="name">sale.profitability.wizard.form</field>
+        <field name="model">sale.profitability.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Sales Profitability Report">
+
+                <!-- ── Filter Section ── -->
+                <group>
+                    <group string="Date Range" col="2">
+                        <field name="date_from" />
+                        <field name="date_to" />
+                    </group>
+                    <group string="Options" col="2">
+                        <field name="company_id"
+                            groups="base.group_multi_company" />
+                        <field name="group_by"
+                            widget="radio"
+                            options="{'horizontal': true}" />
+                    </group>
+                </group>
+
+                <separator string="Filters (Optional)" />
+                <group>
+                    <group>
+                        <field name="partner_ids"
+                            widget="many2many_tags"
+                            placeholder="All customers..."
+                            options="{'no_create': true}" />
+                        <field name="categ_ids"
+                            widget="many2many_tags"
+                            placeholder="All categories..."
+                            options="{'no_create': true}" />
+                    </group>
+                    <group>
+                        <field name="product_ids"
+                            widget="many2many_tags"
+                            placeholder="All products..."
+                            options="{'no_create': true}" />
+                        <field name="salesperson_ids"
+                            widget="many2many_tags"
+                            placeholder="All salespersons..."
+                            options="{'no_create': true}" />
+                    </group>
+                </group>
+
+                <!-- ── Summary (after generation) ── -->
+                <div invisible="total_revenue == 0" class="mt-3 mb-3">
+                    <separator string="Summary" />
+                    <group>
+                        <group>
+                            <field name="total_revenue" readonly="1" />
+                            <field name="total_cost" readonly="1" />
+                        </group>
+                        <group>
+                            <field name="total_margin"
+                                readonly="1"
+                                decoration-success="total_margin &gt; 0"
+                                decoration-danger="total_margin &lt; 0" />
+                            <field name="total_margin_percent"
+                                readonly="1"
+                                decoration-success="total_margin_percent &gt; 0"
+                                decoration-danger="total_margin_percent &lt; 0" />
+                            <field name="record_count" readonly="1" />
+                        </group>
+                    </group>
+                </div>
+
+                <!-- ══════════════════════════════════════════════ -->
+                <!-- KEY FIX: Use 'widget' with view reference     -->
+                <!-- instead of inline <list> definition           -->
+                <!-- ══════════════════════════════════════════════ -->
+                <notebook invisible="not line_ids">
+                    <page string="Report Details" name="report_lines">
+                        <field name="line_ids"
+                            readonly="1"
+                            nolabel="1"
+                            context="{'list_view_ref': 'sale_profitability_report.view_sale_profitability_wizard_line_list'}" />
+                    </page>
+                </notebook>
+
+                <!-- ── Excel Download ── -->
+                <group invisible="not excel_file" class="mt-3">
+                    <group>
+                        <field name="excel_file"
+                            filename="excel_filename"
+                            widget="binary"
+                            readonly="1"
+                            string="Click to Download" />
+                        <field name="excel_filename" invisible="1" />
+                    </group>
+                </group>
+
+                <!-- ── Buttons ── -->
+                <footer>
+                    <button name="action_preview"
+                        type="object"
+                        string="Preview Report"
+                        class="btn-primary me-2" />
+                    <button name="action_print_pdf"
+                        type="object"
+                        string="Print PDF"
+                        class="btn-secondary me-2" />
+                    <button name="action_export_excel"
+                        type="object"
+                        string="Export Excel"
+                        class="btn-success me-2" />
+                    <button name="action_clear"
+                        type="object"
+                        string="Reset"
+                        class="btn-warning me-2"
+                        invisible="not line_ids and not excel_file" />
+                    <button string="Close"
+                        class="btn-secondary"
+                        special="cancel" />
+                </footer>
+
+            </form>
+        </field>
+    </record>
+
+    <!-- ══════════════════════════════════════════════════════════ -->
+    <!-- MENU ACTION                                               -->
+    <!-- ══════════════════════════════════════════════════════════ -->
+
+    <record id="action_sale_profitability_wizard" model="ir.actions.act_window">
+        <field name="name">Sales Profitability Report</field>
+        <field name="res_model">sale.profitability.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="view_id"
+            ref="view_sale_profitability_wizard_form" />
+    </record>
+
+    <menuitem id="menu_sale_profitability_report"
+        name="Sales Profitability"
+        parent="sale.menu_sale_report"
+        action="action_sale_profitability_wizard"
+        sequence="99"
+        groups="sales_team.group_sale_salesman" />
+
+</odoo>

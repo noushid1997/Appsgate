@@ -1,0 +1,434 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <!-- ══════════════════════════════════════════════════════════ -->
+    <!-- QWeb PDF REPORT TEMPLATE                                  -->
+    <!-- ══════════════════════════════════════════════════════════ -->
+
+    <template id="report_profitability_document">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="wizard">
+                <t t-call="web.external_layout">
+
+                    <div class="page" style="font-family: 'Segoe UI', Arial, sans-serif;">
+
+                        <!-- ════════════════════════════════════ -->
+                        <!-- REPORT HEADER                       -->
+                        <!-- ════════════════════════════════════ -->
+
+                        <div
+                            style="text-align: center; margin-bottom: 25px;
+                                    border-bottom: 3px solid #1F4E79;
+                                    padding-bottom: 15px;">
+                            <h2
+                                style="color: #1F4E79; font-weight: 700;
+                                       margin-bottom: 5px; font-size: 22px;">
+                                Sales Profitability Report
+                            </h2>
+                            <p style="color: #555; font-size: 12px; margin: 3px 0;">
+                                <strong>Period:</strong>
+                                <t t-esc="wizard.date_from"
+                                    t-options='{"widget": "date"}' />
+                                <span style="margin: 0 8px;">—</span>
+                                <t t-esc="wizard.date_to"
+                                    t-options='{"widget": "date"}' />
+                                <span style="margin: 0 15px;">|</span>
+                                <strong>Company:</strong>
+                                <t t-esc="wizard.company_id.name" />
+                            </p>
+
+                            <!-- Group By indicator -->
+                            <p
+                                style="color: #1F4E79; font-size: 11px;
+                                      font-weight: 600; margin: 3px 0;">
+                                Grouped by: <t t-if="wizard.group_by == 'order'">
+                                    Order (Detail View)
+                                </t>
+                                <t
+                                    t-elif="wizard.group_by == 'product'">
+                                    Product
+                                </t>
+                                <t
+                                    t-elif="wizard.group_by == 'category'">
+                                    Category
+                                </t>
+                                <t
+                                    t-elif="wizard.group_by == 'customer'">
+                                    Customer
+                                </t>
+                            </p>
+                        </div>
+
+                        <!-- ════════════════════════════════════ -->
+                        <!-- APPLIED FILTERS                     -->
+                        <!-- ════════════════════════════════════ -->
+
+                        <t t-set="has_filters"
+                            t-value="wizard.partner_ids or wizard.categ_ids or wizard.product_ids or wizard.salesperson_ids" />
+
+                        <div t-if="has_filters"
+                            style="margin-bottom: 15px; padding: 10px 15px;
+                                    background-color: #F8F9FA;
+                                    border-left: 4px solid #1F4E79;
+                                    border-radius: 0 4px 4px 0;
+                                    font-size: 11px;">
+                            <strong style="color: #1F4E79;">
+                                Applied Filters:
+                            </strong>
+                            <ul style="margin: 5px 0 0 0; padding-left: 20px;">
+                                <li t-if="wizard.partner_ids">
+                                    <strong>Customers:</strong>
+                                    <t t-esc="', '.join(wizard.partner_ids.mapped('name'))" />
+                                </li>
+                                <li t-if="wizard.categ_ids">
+                                    <strong>Categories:</strong>
+                                    <t t-esc="', '.join(wizard.categ_ids.mapped('complete_name'))" />
+                                </li>
+                                <li t-if="wizard.product_ids">
+                                    <strong>Products:</strong>
+                                    <t t-esc="', '.join(wizard.product_ids.mapped('display_name'))" />
+                                </li>
+                                <li t-if="wizard.salesperson_ids">
+                                    <strong>Salespersons:</strong>
+                                    <t t-esc="', '.join(wizard.salesperson_ids.mapped('name'))" />
+                                </li>
+                            </ul>
+                        </div>
+
+                        <!-- ════════════════════════════════════ -->
+                        <!-- SUMMARY CARDS                       -->
+                        <!-- ════════════════════════════════════ -->
+
+                        <table
+                            style="width: 100%; margin-bottom: 20px;
+                                      border-collapse: separate;
+                                      border-spacing: 10px 0;">
+                            <tr>
+                                <!-- Revenue Card -->
+                                <td
+                                    style="width: 25%; text-align: center;
+                                           padding: 12px 10px;
+                                           background: linear-gradient(135deg, #E8F0FE 0%, #D2E3FC 100%);
+                                           border-radius: 8px;">
+                                    <div
+                                        style="font-size: 10px; color: #5F6368;
+                                                text-transform: uppercase;
+                                                letter-spacing: 0.5px;">
+                                        Total Revenue
+                                    </div>
+                                    <div
+                                        style="font-size: 20px; font-weight: 700;
+                                                color: #1F4E79; margin-top: 4px;">
+                                        <t t-esc="'{:,.2f}'.format(wizard.total_revenue)" />
+                                    </div>
+                                </td>
+
+                                <!-- Cost Card -->
+                                <td
+                                    style="width: 25%; text-align: center;
+                                           padding: 12px 10px;
+                                           background: linear-gradient(135deg, #FFF3E0 0%, #FFE0B2 100%);
+                                           border-radius: 8px;">
+                                    <div
+                                        style="font-size: 10px; color: #5F6368;
+                                                text-transform: uppercase;
+                                                letter-spacing: 0.5px;">
+                                        Total Cost
+                                    </div>
+                                    <div
+                                        style="font-size: 20px; font-weight: 700;
+                                                color: #E65100; margin-top: 4px;">
+                                        <t t-esc="'{:,.2f}'.format(wizard.total_cost)" />
+                                    </div>
+                                </td>
+
+                                <!-- Margin Card -->
+                                <td
+                                    style="width: 25%; text-align: center;
+                                           padding: 12px 10px;
+                                           border-radius: 8px;"
+                                    t-attf-style="background: linear-gradient(135deg, #{wizard.total_margin &gt;= 0 and '#E8F5E9, #C8E6C9' or '#FFEBEE, #FFCDD2'} 100%);">
+                                    <div
+                                        style="font-size: 10px; color: #5F6368;
+                                                text-transform: uppercase;
+                                                letter-spacing: 0.5px;">
+                                        Total Margin
+                                    </div>
+                                    <div
+                                        style="font-size: 20px; font-weight: 700;
+                                                margin-top: 4px;"
+                                        t-attf-style="color: #{wizard.total_margin &gt;= 0 and '#2E7D32' or '#C62828'};">
+                                        <t t-esc="'{:,.2f}'.format(wizard.total_margin)" />
+                                    </div>
+                                </td>
+
+                                <!-- Margin % Card -->
+                                <td
+                                    style="width: 25%; text-align: center;
+                                           padding: 12px 10px;
+                                           border-radius: 8px;"
+                                    t-attf-style="background: linear-gradient(135deg, #{wizard.total_margin_percent &gt;= 0 and '#E8F5E9, #C8E6C9' or '#FFEBEE, #FFCDD2'} 100%);">
+                                    <div
+                                        style="font-size: 10px; color: #5F6368;
+                                                text-transform: uppercase;
+                                                letter-spacing: 0.5px;">
+                                        Overall Margin %
+                                    </div>
+                                    <div
+                                        style="font-size: 20px; font-weight: 700;
+                                                margin-top: 4px;"
+                                        t-attf-style="color: #{wizard.total_margin_percent &gt;= 0 and '#2E7D32' or '#C62828'};">
+                                        <t t-esc="'{:.2f}'.format(wizard.total_margin_percent)" />% </div>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <!-- ════════════════════════════════════ -->
+                        <!-- DETAIL TABLE                        -->
+                        <!-- ════════════════════════════════════ -->
+
+                        <table
+                            style="width: 100%; border-collapse: collapse;
+                                      font-size: 10px; margin-top: 5px;">
+
+                            <!-- ── Table Header ── -->
+                            <thead>
+                                <tr style="background-color: #1F4E79;">
+                                    <th
+                                        style="color: white; padding: 8px 6px;
+                                               text-align: center;
+                                               border: 1px solid #163D64;
+                                               width: 30px;">
+                                        #
+                                    </th>
+                                    <th
+                                        style="color: white; padding: 8px 6px;
+                                               text-align: left;
+                                               border: 1px solid #163D64;">
+                                        Order Ref
+                                    </th>
+                                    <th
+                                        style="color: white; padding: 8px 6px;
+                                               text-align: center;
+                                               border: 1px solid #163D64;">
+                                        Date
+                                    </th>
+                                    <th
+                                        style="color: white; padding: 8px 6px;
+                                               text-align: left;
+                                               border: 1px solid #163D64;">
+                                        Customer
+                                    </th>
+                                    <th
+                                        style="color: white; padding: 8px 6px;
+                                               text-align: left;
+                                               border: 1px solid #163D64;">
+                                        Product
+                                    </th>
+                                    <th
+                                        style="color: white; padding: 8px 6px;
+                                               text-align: left;
+                                               border: 1px solid #163D64;">
+                                        Category
+                                    </th>
+                                    <th
+                                        style="color: white; padding: 8px 6px;
+                                               text-align: right;
+                                               border: 1px solid #163D64;">
+                                        Qty
+                                    </th>
+                                    <th
+                                        style="color: white; padding: 8px 6px;
+                                               text-align: right;
+                                               border: 1px solid #163D64;">
+                                        Revenue
+                                    </th>
+                                    <th
+                                        style="color: white; padding: 8px 6px;
+                                               text-align: right;
+                                               border: 1px solid #163D64;">
+                                        Cost
+                                    </th>
+                                    <th
+                                        style="color: white; padding: 8px 6px;
+                                               text-align: right;
+                                               border: 1px solid #163D64;">
+                                        Margin
+                                    </th>
+                                    <th
+                                        style="color: white; padding: 8px 6px;
+                                               text-align: right;
+                                               border: 1px solid #163D64;">
+                                        Margin %
+                                    </th>
+                                </tr>
+                            </thead>
+
+                            <!-- ── Table Body ── -->
+                            <tbody>
+                                <tr t-foreach="wizard.line_ids" t-as="line"
+                                    t-attf-style="background-color: #{line_index % 2 == 1 and '#F2F7FB' or '#FFFFFF'};">
+
+                                    <!-- Row Number -->
+                                    <td
+                                        style="padding: 6px; text-align: center;
+                                               border: 1px solid #DEE2E6;
+                                               color: #888;">
+                                        <t t-esc="line_index + 1" />
+                                    </td>
+
+                                    <!-- Order Ref -->
+                                    <td
+                                        style="padding: 6px; text-align: left;
+                                               border: 1px solid #DEE2E6;
+                                               font-weight: 600;">
+                                        <t t-esc="line.order_name" />
+                                    </td>
+
+                                    <!-- Date -->
+                                    <td
+                                        style="padding: 6px; text-align: center;
+                                               border: 1px solid #DEE2E6;">
+                                        <t t-if="line.order_date">
+                                            <t t-esc="line.order_date"
+                                                t-options='{"widget": "date"}' />
+                                        </t>
+                                        <t t-else="">—</t>
+                                    </td>
+
+                                    <!-- Customer -->
+                                    <td
+                                        style="padding: 6px; text-align: left;
+                                               border: 1px solid #DEE2E6;">
+                                        <t t-esc="line.partner_name" />
+                                    </td>
+
+                                    <!-- Product -->
+                                    <td
+                                        style="padding: 6px; text-align: left;
+                                               border: 1px solid #DEE2E6;">
+                                        <t t-esc="line.product_name" />
+                                    </td>
+
+                                    <!-- Category -->
+                                    <td
+                                        style="padding: 6px; text-align: left;
+                                               border: 1px solid #DEE2E6;
+                                               color: #666;">
+                                        <t t-esc="line.category_name" />
+                                    </td>
+
+                                    <!-- Quantity -->
+                                    <td
+                                        style="padding: 6px; text-align: right;
+                                               border: 1px solid #DEE2E6;">
+                                        <t t-esc="'{:,.2f}'.format(line.quantity)" />
+                                    </td>
+
+                                    <!-- Revenue -->
+                                    <td
+                                        style="padding: 6px; text-align: right;
+                                               border: 1px solid #DEE2E6;
+                                               font-weight: 600;">
+                                        <t t-esc="'{:,.2f}'.format(line.revenue)" />
+                                    </td>
+
+                                    <!-- Cost -->
+                                    <td
+                                        style="padding: 6px; text-align: right;
+                                               border: 1px solid #DEE2E6;">
+                                        <t t-esc="'{:,.2f}'.format(line.cost)" />
+                                    </td>
+
+                                    <!-- Margin (color-coded) -->
+                                    <td
+                                        style="padding: 6px; text-align: right;
+                                               border: 1px solid #DEE2E6;
+                                               font-weight: 700;"
+                                        t-attf-style="color: #{line.margin &gt;= 0 and '#2E7D32' or '#C62828'};
+                                                       background-color: #{line.margin &gt;= 0 and '#E8F5E9' or '#FFEBEE'};">
+                                        <t t-esc="'{:,.2f}'.format(line.margin)" />
+                                    </td>
+
+                                    <!-- Margin % (color-coded) -->
+                                    <td
+                                        style="padding: 6px; text-align: right;
+                                               border: 1px solid #DEE2E6;
+                                               font-weight: 600;"
+                                        t-attf-style="color: #{line.margin_percent &gt;= 0 and '#2E7D32' or '#C62828'};">
+                                        <t t-esc="'{:.2f}'.format(line.margin_percent)" />% </td>
+                                </tr>
+                            </tbody>
+
+                            <!-- ── Table Footer (Totals) ── -->
+                            <tfoot>
+                                <tr
+                                    style="background-color: #1F4E79; color: white;
+                                           font-weight: 700; font-size: 11px;">
+                                    <td colspan="7"
+                                        style="padding: 10px 6px; text-align: right;
+                                               border: 1px solid #163D64;
+                                               text-transform: uppercase;
+                                               letter-spacing: 1px;">
+                                        TOTALS <span style="font-weight: 400; font-size: 9px;"> (<t
+                                                t-esc="wizard.record_count" /> records) </span>
+                                    </td>
+                                    <td
+                                        style="padding: 10px 6px; text-align: right;
+                                               border: 1px solid #163D64;">
+                                        <t t-esc="'{:,.2f}'.format(wizard.total_revenue)" />
+                                    </td>
+                                    <td
+                                        style="padding: 10px 6px; text-align: right;
+                                               border: 1px solid #163D64;">
+                                        <t t-esc="'{:,.2f}'.format(wizard.total_cost)" />
+                                    </td>
+                                    <td
+                                        style="padding: 10px 6px; text-align: right;
+                                               border: 1px solid #163D64;"
+                                        t-attf-style="color: #{wizard.total_margin &gt;= 0 and '#A5D6A7' or '#EF9A9A'};">
+                                        <t t-esc="'{:,.2f}'.format(wizard.total_margin)" />
+                                    </td>
+                                    <td
+                                        style="padding: 10px 6px; text-align: right;
+                                               border: 1px solid #163D64;"
+                                        t-attf-style="color: #{wizard.total_margin_percent &gt;= 0 and '#A5D6A7' or '#EF9A9A'};">
+                                        <t t-esc="'{:.2f}'.format(wizard.total_margin_percent)" />% </td>
+                                </tr>
+                            </tfoot>
+                        </table>
+
+                        <!-- ════════════════════════════════════ -->
+                        <!-- REPORT FOOTER                       -->
+                        <!-- ════════════════════════════════════ -->
+
+                        <div
+                            style="margin-top: 25px; padding-top: 10px;
+                                    border-top: 1px solid #DEE2E6;
+                                    font-size: 8px; color: #999;
+                                    text-align: center;">
+                            <p style="margin: 2px 0;"> Report generated on <t
+                                    t-esc="context_timestamp(
+                                    datetime.datetime.now()
+                                ).strftime('%d %B %Y at %H:%M')" />
+                                by <t t-esc="user.name" />
+                            </p>
+                            <p style="margin: 2px 0;">
+                                <t t-esc="wizard.company_id.name" />
+                                <t t-if="wizard.company_id.street"> — <t
+                                        t-esc="wizard.company_id.street" />
+                                </t>
+                                <t t-if="wizard.company_id.city"> , <t
+                                        t-esc="wizard.company_id.city" />
+                                </t>
+                            </p>
+                        </div>
+
+                    </div>
+
+                </t>
+            </t>
+        </t>
+    </template>
+
+</odoo>

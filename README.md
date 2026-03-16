@@ -1,7 +1,7 @@
 # Appsgate
 # Odoo Technical Assessment Module
 
-**Odoo Version:** 17.0 / 18.0
+**Odoo Version:** - 18.0
 
 ## Overview
 This custom Odoo module implements four key business customizations covering

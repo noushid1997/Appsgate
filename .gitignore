@@ -12,3 +12,7 @@ __pycache__/
 .vscode/
 *.swp
 *.swo
+
+# Zone Identifier files (Windows)
+*:Zone.Identifier
+*.Zone.Identifier
